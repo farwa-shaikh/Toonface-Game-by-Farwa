@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToonFace Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+      body {
+        font-family: 'Press Start 2P', cursive;
+      }
+      /* Hide scrollbar for game immersion */
+      body::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-900 text-white overflow-hidden">
+    <div id="root"></div>
+  </body>
+</html>

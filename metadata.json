@@ -1,0 +1,5 @@
+{
+  "name": "ToonFace Adventure",
+  "description": "Upload your photo to generate a cartoon avatar using Gemini, then play a Mario-style platformer game as yourself!",
+  "requestFramePermissions": []
+}
