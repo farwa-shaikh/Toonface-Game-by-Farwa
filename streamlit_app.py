@@ -1,12 +1,56 @@
 import streamlit as st
-import os
-import base64
-from PIL import Image
-import io
 import sys
 import subprocess
+import os
 
-# Setup Page
+# -----------------------------------------------------------------------------
+# Dependency Check (Must be at the top)
+# -----------------------------------------------------------------------------
+def check_dependencies():
+    """Checks for required packages and installs them if missing."""
+    required = ["google-genai", "Pillow"]
+    missing = []
+    
+    # Check google-genai
+    try:
+        import google.genai
+    except ImportError:
+        missing.append("google-genai")
+    
+    # Check Pillow
+    try:
+        import PIL
+    except ImportError:
+        missing.append("Pillow")
+
+    if missing:
+        st.warning(f"Missing libraries: {', '.join(missing)}. Installing now...")
+        try:
+            # Install missing packages
+            subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing)
+            st.success("Libraries installed successfully! Reloading app...")
+            st.rerun()
+        except Exception as e:
+            st.error(f"Auto-installation failed: {e}")
+            st.info("Please run this command in your terminal to fix it:")
+            st.code(f"pip install {' '.join(missing)}", language="bash")
+            st.stop()
+
+# Run check before anything else
+check_dependencies()
+
+# -----------------------------------------------------------------------------
+# Imports
+# -----------------------------------------------------------------------------
+import base64
+import io
+from PIL import Image
+from google import genai
+from google.genai import types
+
+# -----------------------------------------------------------------------------
+# Page Config
+# -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="ToonFace Adventure",
     layout="wide",
@@ -48,29 +92,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Gemini API Setup
+# Gemini Client
 # -----------------------------------------------------------------------------
-def install_and_import_genai():
-    try:
-        from google import genai
-        from google.genai import types
-        return genai, types
-    except ImportError:
-        st.warning("Google GenAI SDK not found. Installing now...")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
-            from google import genai
-            from google.genai import types
-            st.success("Installation successful! Reloading...")
-            st.rerun()
-            return genai, types
-        except Exception as e:
-            st.error(f"Failed to auto-install google-genai: {e}")
-            st.error("Please run: pip install google-genai")
-            st.stop()
-
-genai, types = install_and_import_genai()
-
 def get_gemini_client():
     api_key = os.environ.get("API_KEY")
     if not api_key:
