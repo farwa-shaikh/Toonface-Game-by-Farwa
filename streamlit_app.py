@@ -3,6 +3,8 @@ import os
 import base64
 from PIL import Image
 import io
+import sys
+import subprocess
 
 # Setup Page
 st.set_page_config(
@@ -48,12 +50,26 @@ st.markdown("""
 # -----------------------------------------------------------------------------
 # Gemini API Setup
 # -----------------------------------------------------------------------------
-try:
-    from google import genai
-    from google.genai import types
-except ImportError:
-    st.error("Please install the Google GenAI SDK: `pip install google-genai`")
-    st.stop()
+def install_and_import_genai():
+    try:
+        from google import genai
+        from google.genai import types
+        return genai, types
+    except ImportError:
+        st.warning("Google GenAI SDK not found. Installing now...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
+            from google import genai
+            from google.genai import types
+            st.success("Installation successful! Reloading...")
+            st.rerun()
+            return genai, types
+        except Exception as e:
+            st.error(f"Failed to auto-install google-genai: {e}")
+            st.error("Please run: pip install google-genai")
+            st.stop()
+
+genai, types = install_and_import_genai()
 
 def get_gemini_client():
     api_key = os.environ.get("API_KEY")
