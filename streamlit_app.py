@@ -214,21 +214,21 @@ def generate_cartoon_avatar(image_bytes):
         return None
 
 def get_game_html(avatar_base64):
-    # Embedded Game Logic (Vanilla JS)
-    return f"""
+    # Using a standard string (not f-string) to avoid brace escaping hell in JS
+    html_template = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        body {{ margin: 0; overflow: hidden; background: #000; font-family: 'Press Start 2P', cursive; user-select: none; }}
-        canvas {{ display: block; margin: 0 auto; border: 4px solid #334155; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }}
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Press Start 2P', cursive; user-select: none; }
+        canvas { display: block; margin: 0 auto; border: 4px solid #334155; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         
-        #ui, #world-ui {{ position: absolute; top: 20px; color: white; font-size: 20px; z-index: 10; text-shadow: 2px 2px 0 #000; }}
-        #ui {{ left: 20px; }}
-        #world-ui {{ right: 20px; }}
+        #ui, #world-ui { position: absolute; top: 20px; color: white; font-size: 20px; z-index: 10; text-shadow: 2px 2px 0 #000; }
+        #ui { left: 20px; }
+        #world-ui { right: 20px; }
         
-        #overlay {{ 
+        #overlay { 
             display: none; 
             position: absolute; 
             top: 50%; left: 50%; 
@@ -241,13 +241,13 @@ def get_game_html(avatar_base64):
             color: white;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             min-width: 300px;
-        }}
+        }
         
-        h1 {{ margin: 0 0 20px 0; font-size: 30px; }}
-        .victory {{ color: #4ade80; }}
-        .gameover {{ color: #ef4444; }}
+        h1 { margin: 0 0 20px 0; font-size: 30px; }
+        .victory { color: #4ade80; }
+        .gameover { color: #ef4444; }
         
-        button {{ 
+        button { 
             padding: 15px 30px; 
             font-family: 'Press Start 2P'; 
             cursor: pointer; 
@@ -258,9 +258,9 @@ def get_game_html(avatar_base64):
             border-radius: 8px;
             font-size: 16px;
             margin-top: 20px;
-        }}
-        button:hover {{ background: #3b82f6; transform: translateY(-2px); }}
-        button:active {{ border-bottom: 0; transform: translateY(5px); margin-bottom: 5px; }}
+        }
+        button:hover { background: #3b82f6; transform: translateY(-2px); }
+        button:active { border-bottom: 0; transform: translateY(5px); margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -281,7 +281,7 @@ def get_game_html(avatar_base64):
         const ctx = canvas.getContext('2d');
         const overlay = document.getElementById('overlay');
         const avatarImg = new Image();
-        avatarImg.src = "data:image/png;base64,{avatar_base64}";
+        avatarImg.src = "data:image/png;base64,__AVATAR_PLACEHOLDER__";
 
         const GRAVITY = 0.5;
         const JUMP_FORCE = -14;
@@ -291,127 +291,127 @@ def get_game_html(avatar_base64):
         const MAX_LEVEL = 3;
         
         let gameState = 'PLAYING', score = 0, lives = 3, currentLevel = 1, cameraX = 0;
-        let player = {{ x: 50, y: 200, width: 40, height: 40, vx: 0, vy: 0, grounded: false, facingRight: true }};
-        let platforms = [], coins = [], enemies = [], keys = {{}};
+        let player = { x: 50, y: 200, width: 40, height: 40, vx: 0, vy: 0, grounded: false, facingRight: true };
+        let platforms = [], coins = [], enemies = [], keys = {};
         let finishLineX = 3000;
 
-        function initLevel(lvl) {{
+        function initLevel(lvl) {
             platforms = []; coins = []; enemies = [];
             player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; cameraX = 0;
             document.getElementById('levelVal').innerText = lvl;
 
-            if (lvl === 1) {{
+            if (lvl === 1) {
                 finishLineX = 3000;
-                for (let i = 0; i < 40; i++) if (i !== 5 && i !== 12 && i !== 25) platforms.push({{ x: i * 100, y: 500, width: 100, height: 100, type: 'ground' }});
-                platforms.push({{ x: 300, y: 350, width: 150, height: 40, type: 'brick' }});
-                platforms.push({{ x: 600, y: 250, width: 40, height: 40, type: 'block' }});
-                platforms.push({{ x: 640, y: 250, width: 40, height: 40, type: 'brick' }});
-                platforms.push({{ x: 900, y: 350, width: 100, height: 40, type: 'brick' }});
-                platforms.push({{ x: 1300, y: 300, width: 200, height: 40, type: 'brick' }});
-                platforms.push({{ x: 1800, y: 440, width: 60, height: 60, type: 'pipe' }});
-                platforms.push({{ x: 2200, y: 460, width: 40, height: 40, type: 'block' }});
-                platforms.push({{ x: 3000, y: 460, width: 40, height: 40, type: 'block' }});
-                [320, 360, 600, 1000, 1400].forEach((x, i) => coins.push({{ x, y: 200 + (i%2)*50, width: 20, height: 20, collected: false }}));
-                enemies.push({{ x: 500, y: 460, width: 30, height: 30, vx: -2, type: 'goomba', dead: false }});
-                enemies.push({{ x: 1000, y: 460, width: 30, height: 30, vx: -2, type: 'goomba', dead: false }});
-            }} else if (lvl === 2) {{
+                for (let i = 0; i < 40; i++) if (i !== 5 && i !== 12 && i !== 25) platforms.push({ x: i * 100, y: 500, width: 100, height: 100, type: 'ground' });
+                platforms.push({ x: 300, y: 350, width: 150, height: 40, type: 'brick' });
+                platforms.push({ x: 600, y: 250, width: 40, height: 40, type: 'block' });
+                platforms.push({ x: 640, y: 250, width: 40, height: 40, type: 'brick' });
+                platforms.push({ x: 900, y: 350, width: 100, height: 40, type: 'brick' });
+                platforms.push({ x: 1300, y: 300, width: 200, height: 40, type: 'brick' });
+                platforms.push({ x: 1800, y: 440, width: 60, height: 60, type: 'pipe' });
+                platforms.push({ x: 2200, y: 460, width: 40, height: 40, type: 'block' });
+                platforms.push({ x: 3000, y: 460, width: 40, height: 40, type: 'block' });
+                [320, 360, 600, 1000, 1400].forEach((x, i) => coins.push({ x, y: 200 + (i%2)*50, width: 20, height: 20, collected: false }));
+                enemies.push({ x: 500, y: 460, width: 30, height: 30, vx: -2, type: 'goomba', dead: false });
+                enemies.push({ x: 1000, y: 460, width: 30, height: 30, vx: -2, type: 'goomba', dead: false });
+            } else if (lvl === 2) {
                 finishLineX = 3200;
-                platforms.push({{ x: 0, y: 500, width: 300, height: 100, type: 'ground' }});
-                platforms.push({{ x: 400, y: 400, width: 100, height: 40, type: 'brick' }});
-                platforms.push({{ x: 600, y: 300, width: 100, height: 40, type: 'brick' }});
-                platforms.push({{ x: 850, y: 400, width: 100, height: 40, type: 'brick' }});
-                platforms.push({{ x: 1100, y: 500, width: 400, height: 40, type: 'ground' }});
-                platforms.push({{ x: 1600, y: 350, width: 80, height: 40, type: 'block' }});
-                platforms.push({{ x: 1800, y: 250, width: 80, height: 40, type: 'block' }});
-                platforms.push({{ x: 1800, y: 550, width: 100, height: 40, type: 'brick' }});
-                platforms.push({{ x: 2300, y: 450, width: 100, height: 40, type: 'brick' }});
-                platforms.push({{ x: 3000, y: 500, width: 400, height: 100, type: 'ground' }});
-                platforms.push({{ x: 3200, y: 460, width: 40, height: 40, type: 'block' }});
-                coins.push({{ x: 640, y: 250, width: 20, height: 20, collected: false }});
-                coins.push({{ x: 1830, y: 200, width: 20, height: 20, collected: false }});
-                enemies.push({{ x: 1200, y: 460, width: 30, height: 30, vx: -3, type: 'goomba', dead: false }});
-            }} else if (lvl === 3) {{
+                platforms.push({ x: 0, y: 500, width: 300, height: 100, type: 'ground' });
+                platforms.push({ x: 400, y: 400, width: 100, height: 40, type: 'brick' });
+                platforms.push({ x: 600, y: 300, width: 100, height: 40, type: 'brick' });
+                platforms.push({ x: 850, y: 400, width: 100, height: 40, type: 'brick' });
+                platforms.push({ x: 1100, y: 500, width: 400, height: 40, type: 'ground' });
+                platforms.push({ x: 1600, y: 350, width: 80, height: 40, type: 'block' });
+                platforms.push({ x: 1800, y: 250, width: 80, height: 40, type: 'block' });
+                platforms.push({ x: 1800, y: 550, width: 100, height: 40, type: 'brick' });
+                platforms.push({ x: 2300, y: 450, width: 100, height: 40, type: 'brick' });
+                platforms.push({ x: 3000, y: 500, width: 400, height: 100, type: 'ground' });
+                platforms.push({ x: 3200, y: 460, width: 40, height: 40, type: 'block' });
+                coins.push({ x: 640, y: 250, width: 20, height: 20, collected: false });
+                coins.push({ x: 1830, y: 200, width: 20, height: 20, collected: false });
+                enemies.push({ x: 1200, y: 460, width: 30, height: 30, vx: -3, type: 'goomba', dead: false });
+            } else if (lvl === 3) {
                 finishLineX = 3500;
-                platforms.push({{ x: 0, y: 500, width: 200, height: 100, type: 'ground' }});
-                platforms.push({{ x: 300, y: 500, width: 60, height: 40, type: 'block' }});
-                platforms.push({{ x: 450, y: 450, width: 60, height: 40, type: 'block' }});
-                platforms.push({{ x: 600, y: 400, width: 60, height: 40, type: 'block' }});
-                platforms.push({{ x: 950, y: 200, width: 40, height: 300, type: 'pipe' }});
-                platforms.push({{ x: 1100, y: 500, width: 500, height: 40, type: 'ground' }});
-                platforms.push({{ x: 1700, y: 400, width: 80, height: 40, type: 'brick' }});
-                platforms.push({{ x: 2200, y: 550, width: 40, height: 40, type: 'block' }});
-                platforms.push({{ x: 2900, y: 500, width: 600, height: 100, type: 'ground' }});
-                platforms.push({{ x: 3500, y: 460, width: 40, height: 40, type: 'block' }});
-                coins.push({{ x: 765, y: 300, width: 20, height: 20, collected: false }});
-                enemies.push({{ x: 1200, y: 460, width: 30, height: 30, vx: -4, type: 'goomba', dead: false }});
-            }}
-        }}
+                platforms.push({ x: 0, y: 500, width: 200, height: 100, type: 'ground' });
+                platforms.push({ x: 300, y: 500, width: 60, height: 40, type: 'block' });
+                platforms.push({ x: 450, y: 450, width: 60, height: 40, type: 'block' });
+                platforms.push({ x: 600, y: 400, width: 60, height: 40, type: 'block' });
+                platforms.push({ x: 950, y: 200, width: 40, height: 300, type: 'pipe' });
+                platforms.push({ x: 1100, y: 500, width: 500, height: 40, type: 'ground' });
+                platforms.push({ x: 1700, y: 400, width: 80, height: 40, type: 'brick' });
+                platforms.push({ x: 2200, y: 550, width: 40, height: 40, type: 'block' });
+                platforms.push({ x: 2900, y: 500, width: 600, height: 100, type: 'ground' });
+                platforms.push({ x: 3500, y: 460, width: 40, height: 40, type: 'block' });
+                coins.push({ x: 765, y: 300, width: 20, height: 20, collected: false });
+                enemies.push({ x: 1200, y: 460, width: 30, height: 30, vx: -4, type: 'goomba', dead: false });
+            }
+        }
 
-        function resetGame() {{
+        function resetGame() {
             score = 0; lives = 3; currentLevel = 1; gameState = 'PLAYING';
             overlay.style.display = 'none';
             initLevel(1);
             loop();
-        }}
+        }
 
-        function showGameOver(win) {{
+        function showGameOver(win) {
             gameState = 'GAMEOVER';
             overlay.style.display = 'block';
             document.getElementById('finalScore').innerText = score;
             const t = document.getElementById('title'), e = document.getElementById('emoji');
-            if (win) {{ t.innerText = "COURSE CLEAR!"; t.className = "victory"; e.innerText = "🏆"; }}
-            else {{ t.innerText = "GAME OVER"; t.className = "gameover"; e.innerText = "💀"; }}
-        }}
+            if (win) { t.innerText = "COURSE CLEAR!"; t.className = "victory"; e.innerText = "🏆"; }
+            else { t.innerText = "GAME OVER"; t.className = "gameover"; e.innerText = "💀"; }
+        }
 
-        function colCheck(shapeA, shapeB) {{
+        function colCheck(shapeA, shapeB) {
             let vX = (shapeA.x + (shapeA.width / 2)) - (shapeB.x + (shapeB.width / 2));
             let vY = (shapeA.y + (shapeA.height / 2)) - (shapeB.y + (shapeB.height / 2));
             let hWidths = (shapeA.width / 2) + (shapeB.width / 2);
             let hHeights = (shapeA.height / 2) + (shapeB.height / 2);
             let colDir = null;
-            if (Math.abs(vX) < hWidths && Math.abs(vY) < hHeights) {{
+            if (Math.abs(vX) < hWidths && Math.abs(vY) < hHeights) {
                 let oX = hWidths - Math.abs(vX);
                 let oY = hHeights - Math.abs(vY);
-                if (oX >= oY) {{ if (vY > 0) {{ colDir = "t"; shapeA.y += oY; }} else {{ colDir = "b"; shapeA.y -= oY; }} }}
-                else {{ if (vX > 0) {{ colDir = "l"; shapeA.x += oX; }} else {{ colDir = "r"; shapeA.x -= oX; }} }}
-            }}
+                if (oX >= oY) { if (vY > 0) { colDir = "t"; shapeA.y += oY; } else { colDir = "b"; shapeA.y -= oY; } }
+                else { if (vX > 0) { colDir = "l"; shapeA.x += oX; } else { colDir = "r"; shapeA.x -= oX; } }
+            }
             return colDir;
-        }}
+        }
         
-        function checkOverlap(a, b) {{ return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }}
+        function checkOverlap(a, b) { return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
 
-        function update() {{
+        function update() {
             if (gameState !== 'PLAYING') return;
-            if (keys['ArrowRight'] || keys['KeyD']) {{ if (player.vx < MOVE_SPEED) player.vx++; player.facingRight = true; }}
-            if (keys['ArrowLeft'] || keys['KeyA']) {{ if (player.vx > -MOVE_SPEED) player.vx--; player.facingRight = false; }}
-            if ((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && player.grounded) {{ player.vy = JUMP_FORCE; player.grounded = false; }}
+            if (keys['ArrowRight'] || keys['KeyD']) { if (player.vx < MOVE_SPEED) player.vx++; player.facingRight = true; }
+            if (keys['ArrowLeft'] || keys['KeyA']) { if (player.vx > -MOVE_SPEED) player.vx--; player.facingRight = false; }
+            if ((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && player.grounded) { player.vy = JUMP_FORCE; player.grounded = false; }
 
             player.vx *= FRICTION; player.vy += GRAVITY; if (player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
             player.x += player.vx; player.y += player.vy; player.grounded = false;
 
-            platforms.forEach(p => {{ let dir = colCheck(player, p); if (dir === 'b') {{ player.grounded = true; player.vy = 0; }} else if (dir === 't') {{ player.vy *= -0.5; }} }});
+            platforms.forEach(p => { let dir = colCheck(player, p); if (dir === 'b') { player.grounded = true; player.vy = 0; } else if (dir === 't') { player.vy *= -0.5; } });
 
-            enemies.forEach(e => {{
+            enemies.forEach(e => {
                 if (e.dead) return;
                 e.vy = (e.vy || 0) + GRAVITY; e.x += e.vx; e.y += e.vy;
                 let eGrounded = false;
-                platforms.forEach(p => {{ let dir = colCheck(e, p); if (dir === 'b') eGrounded = true; if (dir === 'l' || dir === 'r') e.vx *= -1; }});
+                platforms.forEach(p => { let dir = colCheck(e, p); if (dir === 'b') eGrounded = true; if (dir === 'l' || dir === 'r') e.vx *= -1; });
                 if(!eGrounded && e.y > 600) e.y = 500;
                 
-                if (checkOverlap(player, e)) {{
+                if (checkOverlap(player, e)) {
                     let hitFromAbove = player.vy > 0 && (player.y + player.height - player.vy) < e.y;
-                    if (hitFromAbove) {{ e.dead = true; player.vy = -8; score += 100; }}
-                    else {{ lives--; if (lives <= 0) showGameOver(false); else {{ player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; cameraX = 0; }} }}
-                }}
-            }});
+                    if (hitFromAbove) { e.dead = true; player.vy = -8; score += 100; }
+                    else { lives--; if (lives <= 0) showGameOver(false); else { player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; cameraX = 0; } }
+                }
+            });
 
-            coins.forEach(c => {{ if (!c.collected && checkOverlap(player, c)) {{ c.collected = true; score += 50; }} }});
+            coins.forEach(c => { if (!c.collected && checkOverlap(player, c)) { c.collected = true; score += 50; } });
 
-            if (player.x > finishLineX) {{ if (currentLevel < MAX_LEVEL) {{ currentLevel++; initLevel(currentLevel); }} else {{ showGameOver(true); }} }}
-            if (player.y > 700) {{ lives--; if (lives <= 0) showGameOver(false); else {{ player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; cameraX = 0; }} }}
+            if (player.x > finishLineX) { if (currentLevel < MAX_LEVEL) { currentLevel++; initLevel(currentLevel); } else { showGameOver(true); } }
+            if (player.y > 700) { lives--; if (lives <= 0) showGameOver(false); else { player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; cameraX = 0; } }
 
             let targetCamX = player.x - 350;
             cameraX += (targetCamX - cameraX) * 0.1;
@@ -419,9 +419,9 @@ def get_game_html(avatar_base64):
             
             document.getElementById('scoreVal').innerText = score;
             document.getElementById('livesVal').innerText = lives;
-        }}
+        }
 
-        function draw() {{
+        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             ctx.translate(-cameraX, 0);
@@ -429,17 +429,17 @@ def get_game_html(avatar_base64):
             if (currentLevel === 1) ctx.fillStyle = '#6b8cff'; else if (currentLevel === 2) ctx.fillStyle = '#4a6fa5'; else ctx.fillStyle = '#2d3748';
             ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
 
-            platforms.forEach(p => {{
+            platforms.forEach(p => {
                 if (p.type === 'ground') ctx.fillStyle = '#5c9e60'; else if (p.type === 'brick') ctx.fillStyle = '#b85c3e'; else if (p.type === 'block') ctx.fillStyle = '#e8b756'; else ctx.fillStyle = '#28a828';
                 ctx.fillRect(p.x, p.y, p.width, p.height); ctx.strokeRect(p.x, p.y, p.width, p.height);
-            }});
+            });
 
             ctx.fillStyle = '#fff'; ctx.fillRect(finishLineX + 10, 100, 5, 360);
             ctx.fillStyle = 'red'; ctx.fillRect(finishLineX + 15, 100, 60, 40);
 
-            ctx.fillStyle = '#ffd700'; coins.forEach(c => {{ if (!c.collected) {{ ctx.beginPath(); ctx.arc(c.x+10, c.y+10, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }} }});
+            ctx.fillStyle = '#ffd700'; coins.forEach(c => { if (!c.collected) { ctx.beginPath(); ctx.arc(c.x+10, c.y+10, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke(); } });
 
-            enemies.forEach(e => {{ if (!e.dead) {{ ctx.fillStyle = '#8b4513'; ctx.fillRect(e.x, e.y, e.width, e.height); ctx.fillStyle='white'; ctx.fillRect(e.x+5,e.y+5,8,8); ctx.fillRect(e.x+18,e.y+5,8,8); }} }});
+            enemies.forEach(e => { if (!e.dead) { ctx.fillStyle = '#8b4513'; ctx.fillRect(e.x, e.y, e.width, e.height); ctx.fillStyle='white'; ctx.fillRect(e.x+5,e.y+5,8,8); ctx.fillRect(e.x+18,e.y+5,8,8); } });
 
             let cx = player.x + 20; let cy = player.y + 22;
             let walk = Math.floor(Date.now()/100)%2; let move = Math.abs(player.vx)>0.5; let off = move ? (walk?3:-3) : 0;
@@ -448,21 +448,21 @@ def get_game_html(avatar_base64):
             ctx.fillStyle = '#dc2626'; ctx.fillRect(cx-10, cy, 20, 12);
             ctx.fillStyle = '#2563eb'; ctx.fillRect(cx-10, cy+6, 20, 6); ctx.fillRect(cx-8, cy, 4, 12); ctx.fillRect(cx+4, cy, 4, 12);
             ctx.fillStyle = '#facc15'; ctx.fillRect(cx-7, cy+8, 2, 2); ctx.fillRect(cx+5, cy+8, 2, 2);
-            ctx.fillStyle = '#dc2626'; if(move) {{ ctx.fillRect(cx-14-off, cy+2, 4, 10); ctx.fillRect(cx+10+off, cy+2, 4, 10); }} else {{ ctx.fillRect(cx-14, cy+2, 4, 10); ctx.fillRect(cx+10, cy+2, 4, 10); }}
+            ctx.fillStyle = '#dc2626'; if(move) { ctx.fillRect(cx-14-off, cy+2, 4, 10); ctx.fillRect(cx+10+off, cy+2, 4, 10); } else { ctx.fillRect(cx-14, cy+2, 4, 10); ctx.fillRect(cx+10, cy+2, 4, 10); }
 
-            if (avatarImg.complete && avatarImg.src) {{
+            if (avatarImg.complete && avatarImg.src) {
                 let size = 36; let headY = player.y - 8;
                 ctx.save(); ctx.beginPath(); ctx.arc(cx, headY + size/2, size/2, 0, Math.PI*2); ctx.clip();
-                if (!player.facingRight) {{ ctx.translate(cx + size/2, headY); ctx.scale(-1, 1); ctx.drawImage(avatarImg, 0, 0, size, size); }}
-                else {{ ctx.drawImage(avatarImg, cx - size/2, headY, size, size); }}
+                if (!player.facingRight) { ctx.translate(cx + size/2, headY); ctx.scale(-1, 1); ctx.drawImage(avatarImg, 0, 0, size, size); }
+                else { ctx.drawImage(avatarImg, cx - size/2, headY, size, size); }
                 ctx.restore();
-            }} else {{
+            } else {
                 ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(cx, player.y+10, 16, 0, Math.PI*2); ctx.fill();
-            }}
+            }
 
             ctx.restore();
             requestAnimationFrame(draw);
-        }}
+        }
         
         function loop() { update(); draw(); }
         initLevel(1);
@@ -471,6 +471,9 @@ def get_game_html(avatar_base64):
 </body>
 </html>
     """
+    
+    # Inject variable
+    return html_template.replace("__AVATAR_PLACEHOLDER__", avatar_base64)
 
 # -----------------------------------------------------------------------------
 # MAIN APP UI
